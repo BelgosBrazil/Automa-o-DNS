@@ -27,6 +27,17 @@ Para usar uma porta específica: `python app.py 8080`
 
 Use `dominios-exemplo.txt` como modelo para o arquivo de domínios.
 
+### Deploy na Vercel
+
+1. Conecte o repositório GitHub na [Vercel](https://vercel.com)
+2. **Framework Preset:** Other
+3. **Build Command:** deixe em branco
+4. **Output Directory:** deixe em branco
+5. **Install Command:** deixe o padrão (Vercel detecta Python)
+6. Deploy
+
+Arquivos de configuração já inclusos: `vercel.json`, `pyproject.toml`, `public/index.html`.
+
 ---
 
 ## Script em linha de comando

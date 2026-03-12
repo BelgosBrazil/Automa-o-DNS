@@ -13,6 +13,7 @@ app = Flask(__name__, static_folder="static", static_url_path="")
 
 @app.route("/")
 def index():
+    """Servir index.html. Na Vercel, public/ é servido antes; local usa static/."""
     return send_from_directory("static", "index.html")
 
 

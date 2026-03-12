@@ -1,0 +1,9 @@
+[project]
+name = "automacao-dns"
+version = "0.1.0"
+description = "Configure DNS Hablla na GoDaddy"
+requires-python = ">=3.11"
+dependencies = [
+    "flask>=3.0.0",
+    "requests>=2.28.0",
+]

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNS Hablla → GoDaddy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --bg-card: #1a2332;
+      --bg-input: #232f3e;
+      --border: #2d3a4d;
+      --text: #e6edf3;
+      --text-muted: #8b9eb0;
+      --accent: #00d4aa;
+      --accent-dim: #00a884;
+      --error: #ff6b6b;
+      --success: #00d4aa;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .bg-pattern {
+      position: fixed;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,212,170,0.12), transparent),
+        linear-gradient(180deg, var(--bg) 0%, #0a0e12 100%);
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--text) 0%, var(--text-muted) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .form-row {
+      margin-bottom: 1rem;
+    }
+
+    .form-row:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    input[type="password"] {
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    .file-zone {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .file-zone:hover, .file-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(0,212,170,0.05);
+    }
+
+    .file-zone input[type="file"] {
+      display: none;
+    }
+
+    .file-zone .hint {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    .file-zone .file-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-top: 0.5rem;
+    }
+
+    .file-zone-sm {
+      padding: 0.75rem;
+      min-height: auto;
+    }
+
+    .cname-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .cname-item {
+      display: grid;
+      grid-template-columns: 1fr 2fr auto;
+      gap: 0.75rem;
+      align-items: end;
+    }
+
+    @media (max-width: 540px) {
+      .cname-item {
+        grid-template-columns: 1fr 1fr;
+      }
+      .cname-item .btn-remove {
+        grid-column: 1 / -1;
+      }
+    }
+
+    .btn {
+      padding: 0.6rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-remove {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 0.6rem;
+    }
+
+    .btn-remove:hover {
+      color: var(--error);
+      border-color: var(--error);
+    }
+
+    .btn-add {
+      background: transparent;
+      color: var(--accent);
+      border: 1px dashed var(--accent);
+      margin-top: 0.5rem;
+    }
+
+    .btn-add:hover {
+      background: rgba(0,212,170,0.1);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%);
+      color: var(--bg);
+      font-size: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      filter: brightness(1.1);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .checkbox-row input {
+      width: auto;
+      accent-color: var(--accent);
+    }
+
+    .results {
+      margin-top: 1.5rem;
+    }
+
+    .result-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: var(--bg-input);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.9rem;
+    }
+
+    .result-item.success {
+      border-left: 3px solid var(--success);
+    }
+
+    .result-item.error {
+      border-left: 3px solid var(--error);
+    }
+
+    .result-item .status {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .result-item.success .status {
+      background: rgba(0,212,170,0.2);
+      color: var(--success);
+    }
+
+    .result-item.error .status {
+      background: rgba(255,107,107,0.2);
+      color: var(--error);
+    }
+
+    .errors-list {
+      background: rgba(255,107,107,0.1);
+      border: 1px solid rgba(255,107,107,0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      color: var(--error);
+      font-size: 0.9rem;
+    }
+
+    .errors-list ul {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .link-external {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+
+    .link-external:hover {
+      text-decoration: underline;
+    }
+
+    .help-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-pattern"></div>
+  <div class="container">
+    <header>
+      <h1>DNS Hablla → GoDaddy</h1>
+      <p class="subtitle">Configure os registros CNAME do Hablla em múltiplos domínios</p>
+    </header>
+
+    <form id="form">
+      <div class="card">
+        <div class="card-title">Credenciais GoDaddy</div>
+        <div class="form-row">
+          <label for="api_key">API Key</label>
+          <input type="text" id="api_key" name="api_key" placeholder="sua_api_key" required autocomplete="off">
+          <p class="help-text">Obtenha em <a href="https://developer.godaddy.com/keys/" target="_blank" rel="noopener" class="link-external">developer.godaddy.com/keys</a></p>
+        </div>
+        <div class="form-row">
+          <label for="api_secret">API Secret</label>
+          <input type="password" id="api_secret" name="api_secret" placeholder="••••••••••••" required autocomplete="off">
+        </div>
+        <label class="checkbox-row">
+          <input type="checkbox" id="ote" name="ote">
+          <span>Usar ambiente de teste (OTE)</span>
+        </label>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Domínios a configurar</div>
+        <div class="form-row">
+          <div class="file-zone" id="fileZone">
+            <input type="file" id="domains_file" accept=".txt,.csv">
+            <span>Clique ou arraste um arquivo aqui</span>
+            <p class="hint">Um domínio por linha (.txt ou .csv)</p>
+            <p class="file-name" id="fileName"></p>
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="domains">Ou cole os domínios abaixo</label>
+          <textarea id="domains" name="domains" placeholder="meusite.com.br&#10;outrosite.com&#10;# linhas com # são ignoradas"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Registros CNAME do Hablla</div>
+
+        <div class="hablla-fetch" style="margin-bottom: 1.25rem;">
+          <p class="help-text" style="margin-bottom: 0.75rem;">Buscar automaticamente da API Hablla (token em <a href="https://api.hablla.com/api-docs" target="_blank" rel="noopener" class="link-external">api.hablla.com</a>):</p>
+          <div class="form-row">
+            <label for="hablla_token">API Token Hablla</label>
+            <input type="password" id="hablla_token" placeholder="Token Bearer (obtenha nas configurações do workspace)">
+          </div>
+          <div class="form-row">
+            <label for="hablla_workspace">Workspace ID ou URL do Studio</label>
+            <input type="text" id="hablla_workspace" placeholder="ex: 643d802021b6aa9234eb9797 ou https://studio.hablla.com/workspace/643d.../">
+          </div>
+          <button type="button" class="btn btn-add" id="btnHabllaFetch">Buscar configurações do Hablla</button>
+        </div>
+
+        <div class="import-section" style="margin-bottom: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+          <p class="help-text" style="margin-bottom: 0.75rem;">Ou importar: copie a tabela do Hablla (Configurar DNS) e cole aqui, ou use host,data por linha:</p>
+          <div class="form-row">
+            <textarea id="cname_import" placeholder="Cole aqui a tabela do Hablla ou:&#10;em1234,1234.example.sendgrid.net&#10;url5678,5678.example.sendgrid.net" style="min-height: 80px;"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="file-zone file-zone-sm" id="cnameFileZone">
+              <input type="file" id="cname_file" accept=".csv,.txt">
+              <span>Arraste arquivo CSV aqui ou clique</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-add" id="btnImportCname">Importar</button>
+        </div>
+
+        <div style="padding-top: 1rem; border-top: 1px solid var(--border);">
+          <p class="help-text" style="margin-bottom: 0.75rem;">Registros carregados (edite manualmente se precisar):</p>
+          <div class="cname-list" id="cnameList">
+            <div class="cname-item">
+              <div class="form-row">
+                <label>Host</label>
+                <input type="text" name="cname_host" placeholder="em1234">
+              </div>
+              <div class="form-row">
+                <label>Data (destino)</label>
+                <input type="text" name="cname_data" placeholder="1234.example.sendgrid.net">
+              </div>
+              <button type="button" class="btn btn-remove" disabled>Remover</button>
+            </div>
+          </div>
+          <button type="button" class="btn btn-add" id="addCname">+ Adicionar registro manualmente</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-submit" id="btnSubmit">Configurar DNS</button>
+    </form>
+
+    <div id="results"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('form');
+    const domainsInput = document.getElementById('domains');
+    const domainsFile = document.getElementById('domains_file');
+    const fileZone = document.getElementById('fileZone');
+    const fileName = document.getElementById('fileName');
+    const cnameList = document.getElementById('cnameList');
+    const addCnameBtn = document.getElementById('addCname');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const resultsEl = document.getElementById('results');
+
+    // File upload
+    fileZone.addEventListener('click', () => domainsFile.click());
+    domainsFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        fileName.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          domainsInput.value = ev.target.result;
+        };
+        reader.readAsText(file);
+      }
+    });
+
+    fileZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      fileZone.classList.add('dragover');
+    });
+    fileZone.addEventListener('dragleave', () => fileZone.classList.remove('dragover'));
+    fileZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file && (file.name.endsWith('.txt') || file.name.endsWith('.csv'))) {
+        domainsFile.files = e.dataTransfer.files;
+        fileName.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = (ev) => { domainsInput.value = ev.target.result; };
+        reader.readAsText(file);
+      }
+    });
+
+    // CNAME list
+    addCnameBtn.addEventListener('click', () => {
+      const item = document.createElement('div');
+      item.className = 'cname-item';
+      item.innerHTML = `
+        <div class="form-row">
+          <label>Host</label>
+          <input type="text" name="cname_host" placeholder="em1234">
+        </div>
+        <div class="form-row">
+          <label>Data (destino)</label>
+          <input type="text" name="cname_data" placeholder="1234.example.sendgrid.net">
+        </div>
+        <button type="button" class="btn btn-remove">Remover</button>
+      `;
+      item.querySelector('.btn-remove').addEventListener('click', () => item.remove());
+      cnameList.appendChild(item);
+    });
+
+    cnameList.querySelector('.btn-remove').addEventListener('click', function() {
+      this.closest('.cname-item').remove();
+    });
+
+    function setCnameRecords(records) {
+      cnameList.innerHTML = '';
+      if (records.length === 0) {
+        cnameList.innerHTML = `
+          <div class="cname-item">
+            <div class="form-row"><label>Host</label><input type="text" name="cname_host" placeholder="em1234"></div>
+            <div class="form-row"><label>Data (destino)</label><input type="text" name="cname_data" placeholder="1234.example.sendgrid.net"></div>
+            <button type="button" class="btn btn-remove" disabled>Remover</button>
+          </div>`;
+        cnameList.querySelector('.btn-remove').addEventListener('click', function() { this.closest('.cname-item').remove(); });
+        return;
+      }
+      records.forEach((r, i) => {
+        const item = document.createElement('div');
+        item.className = 'cname-item';
+        item.innerHTML = `
+          <div class="form-row"><label>Host</label><input type="text" name="cname_host" value="${(r.host || '').replace(/"/g, '&quot;')}"></div>
+          <div class="form-row"><label>Data (destino)</label><input type="text" name="cname_data" value="${(r.data || '').replace(/"/g, '&quot;')}"></div>
+          <button type="button" class="btn btn-remove">Remover</button>`;
+        item.querySelector('.btn-remove').addEventListener('click', () => item.remove());
+        cnameList.appendChild(item);
+      });
+    }
+
+    document.getElementById('btnHabllaFetch').addEventListener('click', async () => {
+      const token = document.getElementById('hablla_token').value.trim();
+      const workspace = document.getElementById('hablla_workspace').value.trim();
+      if (!token || !workspace) {
+        alert('Preencha o Token e o Workspace ID');
+        return;
+      }
+      const btn = document.getElementById('btnHabllaFetch');
+      btn.disabled = true;
+      btn.textContent = 'Buscando...';
+      try {
+        const res = await fetch('/api/hablla-fetch-cname', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, workspace_id: workspace }),
+        });
+        const data = await res.json();
+        if (data.ok && data.records && data.records.length > 0) {
+          setCnameRecords(data.records);
+          alert(`${data.records.length} registro(s) carregado(s) do Hablla.`);
+        } else if (data.ok && (!data.records || data.records.length === 0)) {
+          alert('Nenhum registro CNAME encontrado na API. Use a opção "Importar" abaixo.');
+        } else {
+          alert('Erro: ' + (data.errors ? data.errors.join(', ') : 'Não foi possível conectar à API Hablla.'));
+        }
+      } catch (e) {
+        alert('Erro de conexão: ' + e.message);
+      }
+      btn.disabled = false;
+      btn.textContent = 'Buscar configurações do Hablla';
+    });
+
+    document.getElementById('btnImportCname').addEventListener('click', async () => {
+      let text = document.getElementById('cname_import').value.trim();
+      if (!text) {
+        alert('Cole o texto com os registros (host,data por linha) ou selecione um arquivo.');
+        return;
+      }
+      try {
+        const res = await fetch('/api/parse-cname', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+        const data = await res.json();
+        if (data.ok && data.records && data.records.length > 0) {
+          setCnameRecords(data.records);
+          document.getElementById('cname_import').value = '';
+          alert(`${data.records.length} registro(s) importado(s).`);
+        } else {
+          alert('Nenhum registro válido encontrado. Use o formato: host,data');
+        }
+      } catch (e) {
+        alert('Erro: ' + e.message);
+      }
+    });
+
+    document.getElementById('cnameFileZone').addEventListener('click', () => document.getElementById('cname_file').click());
+    document.getElementById('cname_file').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const text = await file.text();
+        document.getElementById('cname_import').value = text;
+        document.getElementById('btnImportCname').click();
+      }
+    });
+
+    // Submit
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = 'Configurando...';
+      resultsEl.innerHTML = '';
+
+      const cnameRecords = [];
+      cnameList.querySelectorAll('.cname-item').forEach(row => {
+        const host = row.querySelector('input[name="cname_host"]')?.value?.trim();
+        const data = row.querySelector('input[name="cname_data"]')?.value?.trim();
+        if (host && data) cnameRecords.push({ host, data });
+      });
+
+      const payload = {
+        api_key: document.getElementById('api_key').value.trim(),
+        api_secret: document.getElementById('api_secret').value.trim(),
+        domains: domainsInput.value.trim(),
+        cname_records: cnameRecords,
+        ote: document.getElementById('ote').checked,
+      };
+
+      try {
+        const res = await fetch('/api/configurar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          let html = '<div class="card results"><div class="card-title">Resultado</div><div class="results-list">';
+          data.results.forEach(r => {
+            html += `<div class="result-item ${r.success ? 'success' : 'error'}">
+              <span>${r.domain}</span>
+              <span class="status">${r.success ? 'OK' : 'Erro'}</span>
+            </div>`;
+            if (!r.success) {
+              html += `<p class="help-text" style="margin: 0.25rem 0 0.5rem;">${r.message}</p>`;
+            }
+          });
+          html += '</div></div>';
+          resultsEl.innerHTML = html;
+        } else {
+          resultsEl.innerHTML = `
+            <div class="errors-list">
+              <strong>Erro</strong>
+              <ul>${(data.errors || []).map(err => `<li>${err}</li>`).join('')}</ul>
+            </div>
+          `;
+        }
+      } catch (err) {
+        resultsEl.innerHTML = `
+          <div class="errors-list">
+            <strong>Erro de conexão</strong>
+            <p>${err.message}. Verifique se o servidor está rodando.</p>
+          </div>
+        `;
+      }
+
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = 'Configurar DNS';
+    });
+  </script>
+</body>
+</html>
