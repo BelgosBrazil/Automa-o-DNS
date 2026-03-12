@@ -1,0 +1,6 @@
+# Liste um domínio por linha
+# Linhas começando com # são ignoradas
+
+meusite.com.br
+outrosite.com
+# loja.exemplo.com

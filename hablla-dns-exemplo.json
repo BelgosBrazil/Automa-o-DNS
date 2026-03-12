@@ -1,0 +1,7 @@
+[
+  {
+    "host": "em1234",
+    "data": "1234.example.sendgrid.net",
+    "ttl": 3600
+  }
+]
